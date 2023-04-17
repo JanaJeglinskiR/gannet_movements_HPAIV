@@ -3,7 +3,7 @@
 ##                  Jana Jeglinski October 2022                            ##
 #############################################################################
 
-# The data for the year 2015 - 2019 is publicly accessible form the Seabird Tracking data base
+# The data for the year 2015 - 2019 is publicly accessible from the Seabird Tracking data base
 # https://www.seabirdtracking.org/
 
 # 2015 chick rearing - study IDs 1341, 1342 
