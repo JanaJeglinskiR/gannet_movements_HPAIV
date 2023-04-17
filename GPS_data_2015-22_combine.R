@@ -27,4 +27,6 @@ alldat <- rbind(other_dat,april_dat,august_dat)
 alldat$julian_d <- lubridate::yday(alldat$GMT)
 
 
+rm(tracks_inc2017, tracks_inc2018, tracks_inc2019, ptracks1519, tracks2015, tracks2016, tracks2017, tracks2018, tracks2019, myfiles, root, tags,i,overview)
 
+write.csv(alldat,"GPS_tracking_data_gannet_15-22.csv", row.names = FALSE)
