@@ -38,10 +38,10 @@ library(rnaturalearth)
 
 ## load GPS data
 
-alldat<-read.csv("GPS_tracking_data_gannet_15-22.csv", header = T) 
+alldat<-read.csv("data/GPS_tracking_data_gannet_15-22.csv", header = T) 
 
 # load colony location data (in GitHub folder DATA)
-cols_keep<-read.csv("DATA/Existing_gannet_coloniesNEAtlantic.csv", header = T) 
+cols_keep<-read.csv("data/Existing_gannet_coloniesNEAtlantic.csv", header = T) 
 
 # in environment: 
 #  GPS tracking data object called alldat
@@ -147,7 +147,7 @@ difftime(test$GMT[5458],test$GMT[5455], units = "min") # 60mins
 
 # load high res land polygon data from Natural earth using high res (resolution = 10m)
 
-land <- st_read("ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp")
+land <- st_read("data/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp")
 land <- land %>% st_set_crs(4326) %>%  st_transform(3035) 
 
 

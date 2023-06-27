@@ -150,14 +150,14 @@ ggdraw() +
   draw_plot(map2g, x = 0.03, y = 0.3, width = 0.33, height = 0.38) +
   draw_plot(map3g, x = 0.03, y = 0, width = 0.33, height = 0.38) +
   draw_plot(fig1E, x = 0.39, y = 0.02, width = 0.6, height = 0.42) +
-  draw_plot(fig1D, x = 0.39, y = 0.45, width = 0.5, height = 0.5) +
+  draw_plot(fig1D, x = 0.39, y = 0.45, width = 0.6, height = 0.5) +
   draw_plot_label(label = c("A", "B", "C", "D", "E"), size = 15,
-                  x = c(0.004, 0.004, 0.004,0.39,0.39), y = c(0.96, 0.66,0.36,0.96,0.46))
+                  x = c(0.003, 0.003, 0.003,0.39,0.39), y = c(0.96, 0.66,0.36,0.97,0.47))
 
 
 ## Saving composite Figure
 
-ggsave("Figure 1.jpg", width = 17.3, height = 20, units = "cm", dpi = 300)
+ggsave("Figure 1.jpeg", width = 17.5, height = 20, units = "cm", dpi = 500)
 
 
 

@@ -21,23 +21,26 @@ library(patchwork)
 tags22 <- c("18220", "18209","18247","18233","18244","18232","18226","18239","18242", "18215")
 ov_dists22 <- ov_dists %>% filter(BIRD_ID %in% tags22)
 
+## calculate transmission duration
+
+t_dur <- ov_dists22 %>% group_by(BIRD_ID) %>% summarise(duration = max(julian_d)-155)
+
+
 
 # reference data
-head(april_dat_ref)
+refdat <- read.csv("data/ref_data_April2022.csv", header = TRUE)
+refdat <- refdat %>% filter(Tag_ID %in% tags22) %>% rename(BIRD_ID = Tag_ID)
+refdat <- refdat[,c(33,5,32,40)]
+refdat$BIRD_ID <- factor(refdat$BIRD_ID, 
+                  levels = c("18220", "18209","18247","18233","18244","18232","18226","18239","18242", "18215"))
 
-BIRD_ID <- c("18232","18220","18226","18209","18242","18233","18239","18247","18215","18244")
-Sex <- c("male","female","male","female","male","female","male","female","male","female")
-PairID <- c(1,1,2,2,3,3,4,4,5,6)
-gan_dat <- data.frame("BIRD_ID" = BIRD_ID,"Sex" = Sex, "PairId" = PairID)
-
-ov_dists22 <- dplyr::left_join(ov_dists22,gan_dat, by = "BIRD_ID")
+ov_dists22 <- dplyr::left_join(ov_dists22,refdat, by = "BIRD_ID")
 
 # reorder factor levels to match mapping in Figure 1 A B C
 
 ov_dists22$BIRD_ID <- factor(ov_dists22$BIRD_ID, 
-                             levels = c("18220", "18209","18247","18233","18244","18232","18226","18239","18242", "18215"))
-
-
+                  levels = c("18220", "18209","18247","18233","18244","18232","18226","18239","18242", "18215"))
+                             
 
 ## Figure 1 B ----
 
@@ -50,12 +53,13 @@ ind_dists <- ggplot(ov_dists22, aes(x=julian_d,y=maxdist)) + geom_point(aes(col 
   geom_vline(xintercept = 155,col = "black") + xlab("Julian day") +
   ylab("Maximum daily distance from Bass Rock (km)")+
   theme_bw() + 
-  facet_grid(cols =vars(Sex), rows = vars(PairId)) +
+  facet_grid(cols =vars(Sex), rows = vars(Pair_ID)) +
   theme(strip.background = element_rect(fill="white")) 
 
-dat_text <- ov_dists22 %>% dplyr::group_by(BIRD_ID, PairId, Sex) %>% dplyr::summarise(n = n())
-dat_text$status <- c("seen alive", "","seen alive","seen alive","found dead", "","","","","")
+# add resighting history
+dat_text <- ov_dists22 %>% dplyr::group_by(BIRD_ID, Pair_ID, Sex, Status) %>% dplyr::summarise(n = n())
+
 
 fig1D <- ind_dists + geom_text(x = 225, y = 920,
-                               data = dat_text,aes(label = status), size = 2.5, fontface = "italic")
+                               data = dat_text,aes(label = Status), size = 2.5, fontface = "italic")
 
