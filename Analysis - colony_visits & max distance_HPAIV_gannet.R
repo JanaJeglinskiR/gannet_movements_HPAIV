@@ -40,17 +40,18 @@ library(rnaturalearth)
 
 alldat<-read.csv("data/GPS_tracking_data_gannet_15-22.csv", header = T) 
 
-# load colony location data (in GitHub folder DATA)
+# load colony location data (in GitHub folder data)
 cols_keep<-read.csv("data/Existing_gannet_coloniesNEAtlantic.csv", header = T) 
 
 # in environment: 
 #  GPS tracking data object called alldat
 #  colony locations object called cols_keep
 
-# omit small young St. Abbs colony - too close to Bass Rock
+# omit colonisation attempt at St. Abbs 
 
 cols_keep <- cols_keep %>% dplyr::filter(Colony != "St. Abbs")
 
+# make sf object and project to LAEA
 cols_keep1 <- st_as_sf(cols_keep,coords=c("Long_rough","Lat_rough")) %>% 
   st_set_crs(4326) %>%  st_transform(3035) 
 
@@ -102,7 +103,7 @@ ovs <- data.frame(check %>%
 ### attendance duration
 tvs <- ovs %>% filter(Col_visits > 1)
 
-# double check colony visits of different birds
+# manually check colony visits of different birds
 # here need to look at duration
 
 test <- tdata %>% filter(BIRD_ID =="1491259") # flew for 4 min past Troup Head, closes distance 385 m
@@ -152,7 +153,7 @@ land <- land %>% st_set_crs(4326) %>%  st_transform(3035)
 
 
 home <- cols_keep1 %>% filter(Colony == "Bass Rock") 
-cols_buff <- st_buffer(cols_keep1, dist = 1000000) # 100 km buffer
+cols_buff <- st_buffer(cols_keep1, dist = 1000000) # 100 km buffer to generate suitably large distance raster template
 
 # create land of suitable size
 land_small <- st_crop(land, st_bbox(cols_buff))
@@ -181,9 +182,10 @@ d <- gridDistance(landr_pts, origin = 2, omit = 1)/1000
 # check 
 image(d)
 
-# convert to stars to be able to extract data
+# convert to stars to extract data
 dstars <- stars::st_as_stars(d) %>% sf::st_set_crs(3035)
-# check crs
+
+# double check crs
 st_crs(dstars)
 
 # extract distance values (in km, based on 1 km distance raster omitting land) for each relevant location for each animals
@@ -198,27 +200,27 @@ tdata <- data.frame(t_data)
 
 ## calculate daily max distance - response variable----
 
-overview_dists <- data.frame(tdata %>% dplyr::group_by(BIRD_ID,julian_d,Year) %>% dplyr::summarize(maxdist = max(dist_BR_km, na.rm=T)))
+overview_dists <- data.frame(tdata %>% dplyr::group_by(BIRD_ID,julian_d,Year,season) %>% dplyr::summarize(maxdist = max(dist_BR_km, na.rm=T)))
 
-## distance plot
+## omit days without trips (distance = 0)
 ov_dists <- overview_dists %>% filter(maxdist > 0)
 
 
 ## overview stats all years
 
-summary_dists <- ov_dists %>% group_by(Year) %>% dplyr::summarize(max.dist = max(maxdist, na.rm=T),mean.dist = mean(maxdist, na.rm=T),sd.dist = sd(maxdist, na.rm=T))
+summary_dists <- ov_dists %>% group_by(Year,season) %>% dplyr::summarize(max.dist = max(maxdist, na.rm=T),mean.dist = mean(maxdist, na.rm=T),sd.dist = sd(maxdist, na.rm=T))
 ov_dists$AI_status <- ifelse(ov_dists$Year == 2022, "HPAI year", "non HPAI years")
 
 
-## overview over transmission cessation----
+## overview over transmission cessation for 2022----
 
-tperiods <- ov_dists %>% group_by(BIRD_ID) %>% filter(AI_status =="HPAI year") %>% summarize(maxJD = max(julian_d), tP = max(julian_d)-155)
+ov_dists1 <- ov_dists %>% filter(Year == 2022 & season == "early season")
+tperiods <- ov_dists1 %>% group_by(BIRD_ID) %>% filter(AI_status =="HPAI year") %>% 
+                                                  summarize(tDur = max(julian_d)-min(julian_d), # transmission duration
+                                                            maxJD = max(julian_d),              # last transmission
+                                                            tPr =      155 - min(julian_d),      # days before outbreak
+                                                            tP = max(julian_d)-155)              # days following outbreak
 
-# the ones that died
-tperiods %>% filter(tP < 10) %>% summarize(mtP = mean(tP), sdtP = sd(tP))
-
-# likely survivors
-tperiods %>% filter(tP > 10 & tP < 102 & BIRD_ID != 18240) %>% summarize(mtP = mean(tP), sdtP = sd(tP))
 
 
 
@@ -230,7 +232,7 @@ ov_dists$Year <- as.factor(ov_dists$Year)
 ov_dists$BIRD_ID <- as.factor(ov_dists$BIRD_ID)
 
 
-## GAM approach ----
+## GAMM  ----
 #gam with individual level random effect - following https://fromthebottomoftheheap.net/2021/02/02/random-effects-in-gams/
 
 m.dist <- gam(maxdist ~ s(julian_d, by = AI_status) + AI_status + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists, method= "REML")
@@ -261,8 +263,54 @@ AIC(m.dist,m.dist.1,m.dist.2)
 
 smooth <- plot_smooths(m.dist, series = julian_d, facet_terms = AI_status, exclude_random = TRUE)
 
-fig1E <-smooth + geom_point(data = ov_dists, aes(x=julian_d, y = maxdist), alpha = 0.2, size = 0.6) +
-  theme_bw() +
-  theme(strip.background =element_rect(fill="white")) + 
+fig1E <- smooth + geom_point(data = ov_dists, aes(x=julian_d, y = maxdist), alpha = 0.2, size = 0.6) +
+  theme_bw() + ylim(-250, 850) +
+   theme(strip.background =element_rect(fill="white")) + 
+  #geom_vline(xintercept = 155,col = "black", alpha = 0.6) +
+  geom_ribbon(data=data.frame(x=c(155,213)), aes(x=x, ymin=-250, ymax=850), fill="gray", inherit.aes=F, alpha=0.2) +
   ylab("Maximum daily distance from Bass Rock (km)") + xlab("Julian day")
+
+fig1E
+
+### sensitivity analysis as suggested by reviewer 2 - omit gannets tracked late in 2022
+
+ov_dists1 <- ov_dists %>% filter (season != "late season")
+
+
+r.dist <- gam(maxdist ~ s(julian_d, by = AI_status) + AI_status + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists1, method= "REML")
+plot(r.dist, page = 1)
+
+summary(r.dist) ## summary of gam
+
+# simplify
+r.dist.1 <- gam(maxdist ~ s(julian_d) + AI_status + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists1, method= "REML")
+plot(r.dist.1, page = 1)
+
+summary(m.dist.1) ## summary of gam
+
+# simplify further
+r.dist.2 <- gam(maxdist ~ s(julian_d) + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists1, method= "REML")
+plot(r.dist.2, page = 1)
+
+summary(r.dist.2) ## summary of gam
+
+
+# compare
+
+AIC(r.dist,r.dist.1,r.dist.2)
+
+## plot
+ov_dists1 <- ov_dists %>% filter(season != "late season")
+
+smooth <- plot_smooths(r.dist, series = julian_d, facet_terms = AI_status, exclude_random = TRUE)
+
+fig1E.a <- smooth + geom_point(data = ov_dists1, aes(x=julian_d, y = maxdist), alpha = 0.2, size = 0.6) +
+  theme_bw() + ylim(-250, 850) +
+  theme(strip.background =element_rect(fill="white")) + 
+  #geom_vline(xintercept = 155,col = "black", alpha = 0.6) +
+  geom_ribbon(data=data.frame(x=c(155,213)), aes(x=x, ymin=-250, ymax=850), fill="gray", inherit.aes=F, alpha=0.2) +
+  ylab("Maximum daily distance from Bass Rock (km)") + xlab("Julian day")
+
+fig1E.a
+
 
