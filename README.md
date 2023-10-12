@@ -27,14 +27,18 @@ animal.id - Bird_ID
 animal_mates - Pair partner
 animal.sex - sex of gannet
 
-7) high resolution shapefile of country polygons obtrained from Natural Earth supplied as ne_10m_admin_0_countries.shp
+7) high resolution shapefile of country polygons obtained from Natural Earth:
+https://www.naturalearthdata.com/downloads/10m-physical-vectors/
+supplied as ne_10m_admin_0_countries.shp
 
 
 
 required code files to run analysis and create figures are
-1) Analysis-colony_visist& max distamce_HPAIV_gannet.R (also generates Figure1E)
+1) Analysis-colony_visit & max distance_HPAIV_gannet.R (also generates Figure1E)
 2) Figure1D.R
 3) Figure1_ABC.R
+
+additional scripts allow accessing data from movebank and preparing the data for the analyses
 
 
 
