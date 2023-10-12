@@ -293,8 +293,6 @@ ggmap(background18226d) + geom_sf(data = t18226, aes(colour = Status), size = 2,
 
 
 # write kml file to better check path
-setwd("~/OneDrive - University of Glasgow/Msc 1 TIME BUDGETS gannets/DATA/2022")
-
 plotKML(t18226, "t18226", open.kml = F)
 
 
