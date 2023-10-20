@@ -243,18 +243,15 @@ summary(m.dist) ## summary of gam
 # simplify
 m.dist.1 <- gam(maxdist ~ s(julian_d) + AI_status + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists, method= "REML")
 plot(m.dist.1, page = 1)
-
 summary(m.dist.1) ## summary of gam
 
 # simplify further
 m.dist.2 <- gam(maxdist ~ s(julian_d) + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists, method= "REML")
 plot(m.dist.2, page = 1)
-
 summary(m.dist.2) ## summary of gam
 
 
 # compare
-
 AIC(m.dist,m.dist.1,m.dist.2)
 
 # plotting

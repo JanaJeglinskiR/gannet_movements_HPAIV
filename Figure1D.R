@@ -26,7 +26,6 @@ ov_dists22 <- ov_dists %>% filter(BIRD_ID %in% tags22)
 t_dur <- ov_dists22 %>% group_by(BIRD_ID) %>% summarise(duration = max(julian_d)-155)
 
 
-
 # reference data
 refdat <- read.csv("data/ref_data_April2022.csv", header = TRUE)
 refdat <- refdat %>% filter(Tag_ID %in% tags22) %>% rename(BIRD_ID = Tag_ID)
@@ -41,15 +40,24 @@ ov_dists22 <- dplyr::left_join(ov_dists22,refdat, by = "BIRD_ID")
 ov_dists22$BIRD_ID <- factor(ov_dists22$BIRD_ID, 
                   levels = c("18220", "18209","18247","18233","18244","18232","18226","18239","18242", "18215"))
                              
+ov_dists22$Pair_ID <- ifelse(ov_dists22$Pair_ID==1, "Pair 1",
+                            ifelse(ov_dists22$Pair_ID==2, "Pair 2",
+                             ifelse(ov_dists22$Pair_ID==3, "Pair 3",
+                             ifelse(ov_dists22$Pair_ID==4, "Pair 4",
+                             ifelse(ov_dists22$Pair_ID==5, "Pair 5","Pair 6")))))
+
+
+ov_dists22$Sex <- ifelse(ov_dists22$Sex =="F", "Female", "Male")
 
 ## Figure 1 B ----
+
 
 show_col(viridis_pal()(10))
 
 tag.colours <- colourvalues::colour_values(1:10, palette = "viridis")
 
 ind_dists <- ggplot(ov_dists22, aes(x=julian_d,y=maxdist)) + geom_point(aes(col = BIRD_ID), alpha = 0.8) + 
-  scale_color_viridis(discrete=TRUE, name = "Bird Id") +
+  scale_color_viridis(discrete=TRUE, name = "Bird ID") +
   geom_vline(xintercept = 155,col = "black") + xlab("Julian day") +
   ylab("Maximum daily distance from Bass Rock (km)")+
   theme_bw() + 
@@ -60,6 +68,6 @@ ind_dists <- ggplot(ov_dists22, aes(x=julian_d,y=maxdist)) + geom_point(aes(col 
 dat_text <- ov_dists22 %>% dplyr::group_by(BIRD_ID, Pair_ID, Sex, Status) %>% dplyr::summarise(n = n())
 
 
-fig1D <- ind_dists + geom_text(x = 225, y = 920,
-                               data = dat_text,aes(label = Status), size = 2.5, fontface = "italic")
+fig1D <- ind_dists + geom_text(x = 250, y = 900,
+                               data = dat_text,aes(label = Status), size = 3, fontface = "italic")
 

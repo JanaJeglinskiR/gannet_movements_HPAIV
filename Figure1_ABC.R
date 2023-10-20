@@ -83,55 +83,61 @@ t_locs$BIRD_ID <- factor(t_locs$BIRD_ID,
  b_dat <- t_locs %>% filter(period == "before")
  o_dat <- o_locs %>% filter(period == "before")
  
+ BR <- cols_keep1 %>% filter(Colony == "Bass Rock")
+ 
 ## Map 1 - before----
 
  tmap_mode("plot")
- map1 <- tm_shape(land, bbox = mybox) + tm_polygons(col = "lightgrey", alpha = 0.4) +
+ map1 <- tm_shape(land, bbox = mybox) + tm_polygons(col = "lightgrey", alpha = 0.2) +
    tm_shape(o_dat, bbox = mybox) + 
    tm_dots(col = "grey", alpha = 0.1, legend.show = FALSE) +
-   tm_shape(cols_keep1) + tm_dots(col = "black", size = 0.05, shape = 5, legend.show = FALSE) +
+   tm_shape(cols_keep1) + tm_dots(col = "turquoise", size = 0.15, shape = 23, legend.show = FALSE) +
    tm_shape(b_dat, bbox = mybox) + 
    tm_dots(col = "BIRD_ID", palette = "viridis", alpha = 0.6, legend.show = FALSE) +
-   tm_compass(size = 4, type = "arrow", position = c("left", "TOP")) +
-   tm_scale_bar(position = c("right", "BOTTOM"), text.size = 0.5) 
-   #tm_layout(title.size = 0.8,  main.title = "Before outbreak", main.title.position = "center")
+   tm_shape(BR) + tm_dots(col = "turquoise", size = 0.5, shape = 23, legend.show = FALSE) +
+   tm_compass(size = 4, type = "arrow", position = c("left", "top")) +
+   tm_scale_bar(position = c("right", "bottom"), text.size = 0.5) +
+   tm_layout(title.size = 0.8,  main.title = "Before outbreak", main.title.position = "center")
  map1 
  
  
 ## Map 2 - during ----
- # here add stars for visited colonies
  
  b_dat <- t_locs %>% filter(period == "during")
  o_dat <- o_locs %>% filter(period == "during")
  
  tmap_mode("plot")
- map2 <- tm_shape(land, bbox = mybox) + tm_polygons(col = "lightgrey", alpha = 0.4) +
+ map2 <- tm_shape(land, bbox = mybox) + tm_polygons(col = "lightgrey", alpha = 0.2) +
    tm_shape(o_dat, bbox = mybox) + 
    tm_dots(col = "grey", alpha = 0.1, legend.show = FALSE) +
-   tm_shape(other) + tm_dots(col = "black", size = 0.05, shape = 5, legend.show = FALSE) +
+   tm_shape(other) + tm_dots(col = "turquoise", size = 0.15, shape = 23, legend.show = FALSE) +
    tm_shape(c_dat) + tm_dots(col = "orange",size = 0.5, shape = 23, legend.show = FALSE) +
    tm_shape(b_dat, bbox = mybox) + 
    tm_dots(col = "BIRD_ID", palette = "viridis", alpha = 0.6, legend.show = FALSE) +
-   tm_compass(size = 4, type = "arrow", position = c("left", "TOP")) +
-   tm_scale_bar(position = c("right", "BOTTOM"), text.size = 0.5) 
-   #tm_layout(title.size = 0.8, main.title = "During outbreak", main.title.position = "center")
+   tm_shape(BR) + tm_dots(col = "turquoise", size = 0.5, shape = 23, legend.show = FALSE) +
+   tm_compass(size = 4, type = "arrow", position = c("left", "top")) +
+   tm_scale_bar(position = c("right", "bottom"), text.size = 0.5) +
+   tm_layout(title.size = 0.8, main.title = "During outbreak", main.title.position = "center")
  map2
  
 ## Map 3 - after----
  
  b_dat <- t_locs %>% filter(period == "after")
  o_dat <- o_locs %>% filter(period == "after")
+ o_dat1 <- o_dat %>% filter(season == "late season")
+ o_dat2 <- o_dat %>% filter(season == "other")
  
  tmap_mode("plot")
- map3 <- tm_shape(land, bbox = mybox) + tm_polygons(col = "lightgrey", alpha = 0.4) +
-   tm_shape(o_dat, bbox = mybox) + 
-   tm_dots(col = "grey", alpha = 0.1, legend.show = FALSE) +
-   tm_shape(cols_keep1) + tm_dots(col = "black", size = 0.05, shape = 5, legend.show = FALSE) +
+ map3 <- tm_shape(land, bbox = mybox) + tm_polygons(col = "lightgrey", alpha = 0.2) +
+   tm_shape(o_dat2, bbox = mybox) + tm_dots(col = "grey", alpha = 0.1, legend.show = FALSE) +
+   tm_shape(o_dat1, bbox = mybox) + tm_dots(col = "black", alpha = 0.1, legend.show = FALSE) +
+   tm_shape(cols_keep1) + tm_dots(col = "turquoise", size = 0.15, shape = 23, legend.show = FALSE) +
    tm_shape(b_dat, bbox = mybox) + 
-   tm_dots(col = "BIRD_ID", palette = "viridis", alpha = 0.6, legend.show = FALSE) +
-   tm_compass(size = 4, type = "arrow", position = c("left", "TOP")) +
-   tm_scale_bar(position = c("right", "BOTTOM"), text.size = 0.5) 
-   #tm_layout(title.size = 0.8, main.title = "After outbreak", main.title.position = "center")
+   tm_dots(col = "BIRD_ID", palette = "viridis", alpha = 0.8, legend.show = FALSE) +
+   tm_shape(BR) + tm_dots(col = "turquoise", size = 0.5, shape = 23, legend.show = FALSE) +
+   tm_compass(size = 4, type = "arrow", position = c("left", "top")) +
+   tm_scale_bar(position = c("right", "bottom"), text.size = 0.5) +
+   tm_layout(title.size = 0.8, main.title = "After outbreak", main.title.position = "center")
  map3
  
 # combine Figures----
@@ -156,6 +162,7 @@ ggdraw() +
 
 
 ## Saving composite Figure
+setwd("~/OneDrive - University of Glasgow/M7 Gannet AI urgency/MANUSCRIPTS/movements of failed breeders/3.2 Nature Scientific Reports/Revision 9 October 2023/Plots")
 
 ggsave("Figure 1.jpeg", width = 17.5, height = 20, units = "cm", dpi = 500)
 
