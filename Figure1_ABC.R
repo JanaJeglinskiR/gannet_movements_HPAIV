@@ -56,7 +56,7 @@ max(alldat$GMT)
 # specify plotting extent
 
 mybox <- st_as_sfc(st_bbox(alldat1))
-mybox <- st_buffer(mybox, 130000)
+mybox <- st_buffer(mybox, 100000)
 
 # option 1
 # extract colours for legend
@@ -95,9 +95,9 @@ t_locs$BIRD_ID <- factor(t_locs$BIRD_ID,
    tm_shape(b_dat, bbox = mybox) + 
    tm_dots(col = "BIRD_ID", palette = "viridis", alpha = 0.6, legend.show = FALSE) +
    tm_shape(BR) + tm_dots(col = "turquoise", size = 0.5, shape = 23, legend.show = FALSE) +
-   tm_compass(size = 4, type = "arrow", position = c("left", "top")) +
-   tm_scale_bar(position = c("right", "bottom"), text.size = 0.5) +
-   tm_layout(title.size = 0.8,  main.title = "Before outbreak", main.title.position = "center")
+   tm_compass(size = 2, type = "arrow", position = c("right", "TOP")) +
+   tm_scale_bar(position = c("right", "BOTTOM"), text.size = 0.5) +
+   tm_layout(title = "Before outbreak")
  map1 
  
  
@@ -115,9 +115,9 @@ t_locs$BIRD_ID <- factor(t_locs$BIRD_ID,
    tm_shape(b_dat, bbox = mybox) + 
    tm_dots(col = "BIRD_ID", palette = "viridis", alpha = 0.6, legend.show = FALSE) +
    tm_shape(BR) + tm_dots(col = "turquoise", size = 0.5, shape = 23, legend.show = FALSE) +
-   tm_compass(size = 4, type = "arrow", position = c("left", "top")) +
-   tm_scale_bar(position = c("right", "bottom"), text.size = 0.5) +
-   tm_layout(title.size = 0.8, main.title = "During outbreak", main.title.position = "center")
+   tm_compass(size = 2, type = "arrow", position = c("right", "TOP")) +
+   tm_scale_bar(position = c("right", "BOTTOM"), text.size = 0.5) +
+   tm_layout(title = "During outbreak")
  map2
  
 ## Map 3 - after----
@@ -135,11 +135,23 @@ t_locs$BIRD_ID <- factor(t_locs$BIRD_ID,
    tm_shape(b_dat, bbox = mybox) + 
    tm_dots(col = "BIRD_ID", palette = "viridis", alpha = 0.8, legend.show = FALSE) +
    tm_shape(BR) + tm_dots(col = "turquoise", size = 0.5, shape = 23, legend.show = FALSE) +
-   tm_compass(size = 4, type = "arrow", position = c("left", "top")) +
-   tm_scale_bar(position = c("right", "bottom"), text.size = 0.5) +
-   tm_layout(title.size = 0.8, main.title = "After outbreak", main.title.position = "center")
+   tm_compass(size = 2, type = "arrow", position = c("right", "TOP")) +
+   tm_scale_bar(position = c("right", "BOTTOM"), text.size = 0.5) +
+   tm_layout(title = "After outbreak")
  map3
+
  
+ setwd("~/OneDrive - University of Glasgow/M7 Gannet AI urgency/MANUSCRIPTS/movements of failed breeders/3.2 Nature Scientific Reports/Revision 9 October 2023/Plots")
+ 
+ tmap_save(map3, "Fig1c.jpg", height = 12, width = 12, units = "cm", dpi = 300)
+ 
+ 
+ 
+ current.mode <- tmap_mode("plot")
+  fig1abc <- tmap_arrange(map1, map2, map3, ncol = 2, widths = 0., nrow = 3, heights = 0.33)
+ 
+ 
+
 # combine Figures----
  
 #map0g <- tmap_grob(map0)
@@ -147,11 +159,18 @@ map1g <- tmap_grob(map1)
 map2g <- tmap_grob(map2)
 map3g <- tmap_grob(map3)
 
+
+library(grid)
+
+grid.newpage()
+pushViewport(viewport(x = 0.1, y = 0.1, width = 1, height = 1))
+grid.draw(map1g)
+
 ## combine map with Figure 1D & Figure 1E
 
 library(cowplot)
 
-ggdraw() +
+p <- ggdraw() +
   draw_plot(map1g, x = 0.03, y = 0.6, width = 0.33, height = 0.38) +
   draw_plot(map2g, x = 0.03, y = 0.3, width = 0.33, height = 0.38) +
   draw_plot(map3g, x = 0.03, y = 0, width = 0.33, height = 0.38) +
@@ -161,12 +180,13 @@ ggdraw() +
                   x = c(0.003, 0.003, 0.003,0.39,0.39), y = c(0.96, 0.66,0.36,0.97,0.47))
 
 
+
+
+
 ## Saving composite Figure
 setwd("~/OneDrive - University of Glasgow/M7 Gannet AI urgency/MANUSCRIPTS/movements of failed breeders/3.2 Nature Scientific Reports/Revision 9 October 2023/Plots")
 
-ggsave("Figure 1.jpeg", width = 17.5, height = 20, units = "cm", dpi = 500)
-
-
+ggsave("Fig1e.jpeg", width = 13, height = 9, units = "cm", dpi = 400)
 
 
 
