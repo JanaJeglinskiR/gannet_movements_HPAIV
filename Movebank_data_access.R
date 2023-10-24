@@ -23,12 +23,12 @@ april_dat <- getMovebankLocationData(study=studyID, sensorID="GPS",
                             animalName=april_tags)
 
 
-# April birds
+# August birds
 studyID <- 2658117564
 
 august_tags <- c("1395582","139597","1395976", "1395977", "1395979", "1395983", "1395986", "1498285", "1491303", "1491430")
 
-# download data for April birds
+# download data for August birds
 august_dat <- getMovebankLocationData(study=studyID, sensorID="GPS",
                             animalName=august_tags)
 
