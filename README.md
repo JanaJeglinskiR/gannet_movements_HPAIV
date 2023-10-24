@@ -13,7 +13,7 @@ Longitude - geographic coordinate of Longitude
 BIRD_ID - ID of GPS tracked gannet
 
 
-3) Existing_gannet_coloniesNEAtlantic.csv
+2) Existing_gannet_coloniesNEAtlantic.csv
 relevant columns:
 Colony - name of gannet colony
 ColId - Id of colony
@@ -21,15 +21,15 @@ Lat_rough - geographic coordinate of Latitude
 Long_rough - geographic coordinate of Longitude
 
 
-5) ref_data_April2022.csv
+3) ref_data_April2022.csv
 relevant columns:
 animal.id - Bird_ID
 animal_mates - Pair partner
 animal.sex - sex of gannet
 
-7) high resolution shapefile of country polygons obtained from Natural Earth:
+high resolution shapefile of country polygons can be obtained from Natural Earth:
 https://www.naturalearthdata.com/downloads/10m-physical-vectors/
-supplied as ne_10m_admin_0_countries.shp
+chose file ne_10m_admin_0_countries.shp
 
 
 
