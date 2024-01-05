@@ -21,6 +21,10 @@ april_dat <- april_dat[c(14,3,4,5,11)]
 august_dat <- august_dat[c(16,3,4,5,13)]
 other_dat <- other_dat[c(1,10,8,9,2)]
 
+april_dat$season <- "early season"
+august_dat$season <- "late season"
+other_dat$season <- "other"
+
 alldat <- rbind(other_dat,april_dat,august_dat)
 
 ## append julian day
