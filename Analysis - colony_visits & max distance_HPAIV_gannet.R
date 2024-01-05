@@ -38,10 +38,10 @@ library(rnaturalearth)
 
 ## load GPS data
 
-alldat<-read.csv("data/GPS_tracking_data_gannet_15-22.csv", header = T) 
+alldat<-read.csv("GPS_tracking_data_gannet_15-22.csv", header = T) 
 
 # load colony location data (in GitHub folder data)
-cols_keep<-read.csv("data/Existing_gannet_coloniesNEAtlantic.csv", header = T) 
+cols_keep<-read.csv("Existing_gannet_coloniesNEAtlantic.csv", header = T) 
 
 # in environment: 
 #  GPS tracking data object called alldat
@@ -148,7 +148,7 @@ difftime(test$GMT[5458],test$GMT[5455], units = "min") # 60mins
 
 # load high res land polygon data from Natural earth using high res (resolution = 10m)
 
-land <- st_read("data/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp")
+land <- st_read("ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp")
 land <- land %>% st_set_crs(4326) %>%  st_transform(3035) 
 
 
@@ -160,7 +160,7 @@ land_small <- st_crop(land, st_bbox(cols_buff))
 
 
 # rasterize template for land raster
-r <- raster(extent(land_small), resolution = 1000) # 1 km resolution
+r <- raster::raster(extent(land_small), resolution = 1000) # 1 km resolution
 landr <- fasterize(dplyr::summarize(land_small), r)
 raster::crs(r) <- "EPSG:3035"
 
@@ -190,7 +190,7 @@ st_crs(dstars)
 
 # extract distance values (in km, based on 1 km distance raster omitting land) for each relevant location for each animals
 
-distances <- st_extract(dstars,at = t_data) %>% st_as_sf()
+distances <- stars::st_extract(dstars,at = t_data) %>% st_as_sf()
 t_data$dist_BR_km <- as.numeric(distances$layer)
 
 
@@ -201,6 +201,7 @@ tdata <- data.frame(t_data)
 ## calculate daily max distance - response variable----
 
 overview_dists <- data.frame(tdata %>% dplyr::group_by(BIRD_ID,julian_d,Year,season) %>% dplyr::summarize(maxdist = max(dist_BR_km, na.rm=T)))
+
 
 ## omit days without trips (distance = 0)
 ov_dists <- overview_dists %>% filter(maxdist > 0)
