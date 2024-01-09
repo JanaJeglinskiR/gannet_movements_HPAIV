@@ -27,7 +27,8 @@ t_dur <- ov_dists22 %>% group_by(BIRD_ID) %>% summarise(duration = max(julian_d)
 
 
 # reference data
-refdat <- read.csv("data/ref_data_April2022.csv", header = TRUE)
+
+refdat <- read.csv("ref_data_April2022.csv", header = TRUE)
 refdat <- refdat %>% filter(Tag_ID %in% tags22) %>% rename(BIRD_ID = Tag_ID)
 refdat <- refdat[,c(33,5,32,40)]
 refdat$BIRD_ID <- factor(refdat$BIRD_ID, 
@@ -70,4 +71,26 @@ dat_text <- ov_dists22 %>% dplyr::group_by(BIRD_ID, Pair_ID, Sex, Status) %>% dp
 
 fig1D <- ind_dists + geom_text(x = 250, y = 900,
                                data = dat_text,aes(label = Status), size = 3, fontface = "italic")
+
+### Fig 1d with ribbon
+
+ind_dists <- ggplot(ov_dists22, aes(x=julian_d,y=maxdist)) + geom_point(aes(col = BIRD_ID), alpha = 0.8) + 
+  scale_color_viridis(discrete=TRUE, name = "Bird ID") +
+  geom_ribbon(data=data.frame(x=c(155,213)), aes(x=x, ymin=0, ymax=850), fill="gray", inherit.aes=F, alpha=0.2) +
+  xlab("Julian day") +
+  ylab("Maximum daily distance from Bass Rock (km)")+
+  theme_bw() + 
+  facet_grid(cols =vars(Sex), rows = vars(Pair_ID)) +
+  theme(strip.background = element_rect(fill="white")) 
+
+# add resighting history
+dat_text <- ov_dists22 %>% dplyr::group_by(BIRD_ID, Pair_ID, Sex, Status) %>% dplyr::summarise(n = n())
+
+
+fig1D <- ind_dists + geom_text(x = 240, y = 900,
+                               data = dat_text,aes(label = Status), size = 3, fontface = "italic")
+
+
+ggsave("Fig1d_1.jpeg", width = 13, height = 16, units = "cm", dpi = 400)
+
 
