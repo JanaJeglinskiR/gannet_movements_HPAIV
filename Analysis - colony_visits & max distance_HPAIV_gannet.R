@@ -198,20 +198,36 @@ rm(tdata)
 tdata <- data.frame(t_data)
 
 
+## overview distances
+
+ggplot(data = tdata, aes(x=Year, y= dist_BR_km)) + geom_point() 
+
+test <- tdata %>% dplyr::group_by(Year,season) %>% dplyr::summarize(maxdist = max(dist_BR_km, na.rm=T), mindist = min(dist_BR_km, na.rm=T))
+
+
+
 ## calculate daily max distance - response variable----
 
 overview_dists <- data.frame(tdata %>% dplyr::group_by(BIRD_ID,julian_d,Year,season) %>% dplyr::summarize(maxdist = max(dist_BR_km, na.rm=T)))
 
 
-## omit days without trips (distance = 0)
-ov_dists <- overview_dists %>% filter(maxdist > 0)
+## double check distances in pre HPAI dataset
 
+ggplot(overview_dists, aes(x=maxdist, fill=AI_status)) + geom_density(alpha=0.5) + theme_minimal()
+
+
+
+
+## omit days without trips (distance = 0)
+ov_dists <- overview_dists %>% filter(maxdist > 2)
+
+
+ov_dists$AI_status <- ifelse(ov_dists$Year == 2022, "HPAI year", "non HPAI years")
+#overview_dists$AI_status <- ifelse(overview_dists$Year == 2022, "HPAI year", "non HPAI years")
 
 ## overview stats all years
 
 summary_dists <- ov_dists %>% group_by(Year,season) %>% dplyr::summarize(max.dist = max(maxdist, na.rm=T),mean.dist = mean(maxdist, na.rm=T),sd.dist = sd(maxdist, na.rm=T))
-ov_dists$AI_status <- ifelse(ov_dists$Year == 2022, "HPAI year", "non HPAI years")
-
 
 ## overview over transmission cessation for 2022----
 
@@ -224,7 +240,6 @@ tperiods <- ov_dists1 %>% group_by(BIRD_ID) %>% filter(AI_status =="HPAI year") 
 
 
 
-
 #### 2. model distances #### ----
 
 ov_dists$AI_status <- factor(ov_dists$AI_status, levels = c("non HPAI years", "HPAI year"))
@@ -232,13 +247,17 @@ tdata$Year <- as.factor(tdata$Year)
 ov_dists$Year <- as.factor(ov_dists$Year)
 ov_dists$BIRD_ID <- as.factor(ov_dists$BIRD_ID)
 
+# unfiltered dataset
+#overview_dists$AI_status <- factor(overview_dists$AI_status, levels = c("non HPAI years", "HPAI year"))
+#overview_dists$Year <- as.factor(overview_dists$Year)
+#overview_dists$BIRD_ID <- as.factor(overview_dists$BIRD_ID)
+
 
 ## GAMM  ----
-#gam with individual level random effect - following https://fromthebottomoftheheap.net/2021/02/02/random-effects-in-gams/
+#gam with individual level random effect - following https://fromthebottomoftheheap.net/2021/02/02/random-effects-in-gams/----
 
 m.dist <- gam(maxdist ~ s(julian_d, by = AI_status) + AI_status + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists, method= "REML")
 plot(m.dist, page = 1)
-
 summary(m.dist) ## summary of gam
 
 # simplify
@@ -251,24 +270,101 @@ m.dist.2 <- gam(maxdist ~ s(julian_d) + s(BIRD_ID, bs = "re"), family = "gaussia
 plot(m.dist.2, page = 1)
 summary(m.dist.2) ## summary of gam
 
+# intercept only
+m.dist.3 <- gam(maxdist ~ s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists, method= "REML")
+plot(m.dist.3, page = 1)
+summary(m.dist.2) ## summary of gam
 
 # compare
-AIC(m.dist,m.dist.1,m.dist.2)
+AIC(m.dist,m.dist.1,m.dist.2,m.dist.3)
+
+
+## repeat with log link----
+m.dist1 <- gam(maxdist ~ s(julian_d, by = AI_status) + AI_status + s(BIRD_ID, bs = "re"), family = gaussian(link = "log"), data = ov_dists, method= "REML")
+plot(m.dist1, page = 1)
+summary(m.dist1) ## summary of gam
+
+# simplify
+m.dist2 <- gam(maxdist ~ s(julian_d) + AI_status + s(BIRD_ID, bs = "re"), family = gaussian(link = "log"), data = ov_dists, method= "REML")
+plot(m.dist2, page = 1)
+summary(m.dist2) ## summary of gam
+
+# simplify further
+m.dist3 <- gam(maxdist ~ s(julian_d) + s(BIRD_ID, bs = "re"), family = gaussian(link = "log"), data = ov_dists, method= "REML")
+plot(m.dist3, page = 1)
+summary(m.dist3) ## summary of gam
+
+# intercept only
+m.dist4 <- gam(maxdist ~ s(BIRD_ID, bs = "re"),family = gaussian(link = "log"), data = ov_dists, method= "REML")
+plot(m.dist4, page = 1)
+summary(m.dist4) ## summary of gam
+
+# compare
+AIC(m.dist1,m.dist2,m.dist3,m.dist4)
+
+## publication level plot
+
+
+## repeat model with gamma family----
+# not possible if zero distances are maintained
+m.dist.g <- gam(maxdist ~ s(julian_d, by = AI_status) + AI_status + s(BIRD_ID, bs = "re"), family = Gamma(link = "identity"), data = ov_dists, method= "REML")
+plot(m.dist.g, page = 1)
+summary(m.dist.g) ## summary of gam
+
+# simplify
+m.dist.g1 <- gam(maxdist ~ s(julian_d) + AI_status + s(BIRD_ID, bs = "re"), family = Gamma(link = "identity"), data = ov_dists, method= "REML")
+plot(m.dist2, page = 1)
+summary(m.dist.g1) ## summary of gam
+
+# simplify further
+m.dist.g2 <- gam(maxdist ~ s(julian_d) + s(BIRD_ID, bs = "re"), family = Gamma(link = "identity"), data = ov_dists, method= "REML")
+plot(m.dist3, page = 1)
+summary(m.dist.g2) ## summary of gam
+
+# intercept only
+m.dist.g3 <- gam(maxdist ~ s(BIRD_ID, bs = "re"),family = Gamma(link = "identity"), data = ov_dists, method= "REML")
+plot(m.dist4, page = 1)
+summary(m.dist.g3) ## summary of gam
+
+# compare
+AIC(m.dist.g,m.dist.g1,m.dist.g2,m.dist.g3)
+
+
 
 # plotting
 #https://cran.r-project.org/web/packages/itsadug/vignettes/overview.html
 
+#installed package tidymv from GitHub using install_github("stefanocoretta/tidymv")
 
-smooth <- plot_smooths(m.dist, series = julian_d, facet_terms = AI_status, exclude_random = TRUE)
 
-fig1E <- smooth + geom_point(data = ov_dists, aes(x=julian_d, y = maxdist), alpha = 0.2, size = 0.6) +
+smooth <- plot_smooths(m.dist1, series = julian_d, facet_terms = AI_status, exclude_random = TRUE, transform = exp)
+
+
+fig1Ea <- smooth + geom_point(data = ov_dists, aes(x=julian_d, y = maxdist), alpha = 0.2, size = 0.6) +
   theme_bw() + ylim(-250, 850) +
    theme(strip.background =element_rect(fill="white")) + 
   #geom_vline(xintercept = 155,col = "black", alpha = 0.6) +
   geom_ribbon(data=data.frame(x=c(155,213)), aes(x=x, ymin=-250, ymax=850), fill="gray", inherit.aes=F, alpha=0.2) +
   ylab("Maximum daily distance from Bass Rock (km)") + xlab("Julian day")
 
-fig1E
+fig1Ea
+
+
+## with gamma model
+
+smooth <- tidymv::plot_smooths(m.dist.g, series = julian_d, facet_terms = AI_status, exclude_random = TRUE)
+
+fig1Eb <- smooth + geom_point(data = ov_dists, aes(x=julian_d, y = maxdist), alpha = 0.2, size = 0.6) +
+  theme_bw() + ylim(-250, 850) +
+  theme(strip.background =element_rect(fill="white")) + 
+  #geom_vline(xintercept = 155,col = "black", alpha = 0.6) +
+  geom_ribbon(data=data.frame(x=c(155,213)), aes(x=x, ymin=-250, ymax=850), fill="gray", inherit.aes=F, alpha=0.2) +
+  ylab("Maximum daily distance from Bass Rock (km)") + xlab("Julian day")
+
+fig1Eb
+
+
+
 
 ### sensitivity analysis as suggested by reviewer 2 - omit gannets tracked late in 2022
 
