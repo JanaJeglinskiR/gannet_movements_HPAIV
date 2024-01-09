@@ -182,11 +182,9 @@ p <- ggdraw() +
 
 
 
-
 ## Saving composite Figure
-setwd("~/OneDrive - University of Glasgow/M7 Gannet AI urgency/MANUSCRIPTS/movements of failed breeders/3.2 Nature Scientific Reports/Revision 9 October 2023/Plots")
 
-ggsave("Fig1e.jpeg", width = 13, height = 9, units = "cm", dpi = 400)
+ggsave("Fig1e_1.jpeg", width = 13, height = 9, units = "cm", dpi = 400)
 
 
 
