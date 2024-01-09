@@ -371,27 +371,31 @@ fig1Eb
 ov_dists1 <- ov_dists %>% filter (season != "late season")
 
 
-r.dist <- gam(maxdist ~ s(julian_d, by = AI_status) + AI_status + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists1, method= "REML")
+r.dist <- gam(maxdist ~ s(julian_d, by = AI_status) + AI_status + s(BIRD_ID, bs = "re"), family = gaussian(link = "log"), data = ov_dists1, method= "REML")
 plot(r.dist, page = 1)
 
 summary(r.dist) ## summary of gam
 
 # simplify
-r.dist.1 <- gam(maxdist ~ s(julian_d) + AI_status + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists1, method= "REML")
+r.dist.1 <- gam(maxdist ~ s(julian_d) + AI_status + s(BIRD_ID, bs = "re"), family = gaussian(link = "log"), data = ov_dists1, method= "REML")
 plot(r.dist.1, page = 1)
 
 summary(m.dist.1) ## summary of gam
 
 # simplify further
-r.dist.2 <- gam(maxdist ~ s(julian_d) + s(BIRD_ID, bs = "re"), family = "gaussian", data = ov_dists1, method= "REML")
+r.dist.2 <- gam(maxdist ~ s(julian_d) + s(BIRD_ID, bs = "re"), family = gaussian(link = "log"), data = ov_dists1, method= "REML")
 plot(r.dist.2, page = 1)
 
 summary(r.dist.2) ## summary of gam
 
+# intercept only
+r.dist.3 <- gam(maxdist ~  s(BIRD_ID, bs = "re"), family = gaussian(link = "log"), data = ov_dists1, method= "REML")
+plot(r.dist.3, page = 1)
+summary(r.dist.3) ## summary of gam
 
 # compare
 
-AIC(r.dist,r.dist.1,r.dist.2)
+AIC(r.dist,r.dist.1,r.dist.2,r.dist.3)
 
 ## plot
 ov_dists1 <- ov_dists %>% filter(season != "late season")
